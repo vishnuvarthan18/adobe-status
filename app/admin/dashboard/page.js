@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
 const todayStr = () => new Date().toISOString().split('T')[0];
@@ -8,6 +8,12 @@ const todayStr = () => new Date().toISOString().split('T')[0];
 function fmt(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function isExpired(row) {
+  if (row.plan_type === 'lifetime') return false;
+  if (row.status !== 'active') return true;
+  return row.expires_at && new Date(row.expires_at) < new Date();
 }
 
 const inputCls = 'w-full px-3 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 text-sm outline-none transition-all focus:border-blue-500 focus:bg-white appearance-none';
@@ -34,6 +40,10 @@ export default function AdminDashboard() {
   const [deletingId, setDeletingId] = useState(null);
   const [msg, setMsg] = useState(null);
 
+  const [search, setSearch] = useState('');
+  const [filterPlan, setFilterPlan] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+
   useEffect(() => {
     if (!localStorage.getItem('adminLoggedIn')) router.push('/admin');
     else fetchUsers();
@@ -46,6 +56,21 @@ export default function AdminDashboard() {
       setUsers(d.users || []);
     } catch {}
   };
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return users.filter(row => {
+      if (q) {
+        const nameMatch = (row.users?.name || '').toLowerCase().includes(q);
+        const emailMatch = (row.users?.email || '').toLowerCase().includes(q);
+        if (!nameMatch && !emailMatch) return false;
+      }
+      if (filterPlan !== 'all' && row.plan_type !== filterPlan) return false;
+      if (filterStatus === 'active' && isExpired(row)) return false;
+      if (filterStatus === 'expired' && !isExpired(row)) return false;
+      return true;
+    });
+  }, [users, search, filterPlan, filterStatus]);
 
   const handleAdd = async e => {
     e.preventDefault();
@@ -88,6 +113,8 @@ export default function AdminDashboard() {
   };
 
   const logout = () => { localStorage.removeItem('adminLoggedIn'); router.push('/admin'); };
+
+  const selectCls = 'px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-600 text-xs font-medium outline-none transition-all focus:border-blue-400 cursor-pointer appearance-none';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900">
@@ -162,22 +189,65 @@ export default function AdminDashboard() {
 
           {/* Table card */}
           <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
-            <div className="px-5 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-base font-bold text-gray-900">
-                Users <span className="font-normal text-gray-400">({users.length})</span>
-              </h2>
-              <button
-                onClick={fetchUsers}
-                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 text-xs font-medium hover:bg-gray-100 transition-colors cursor-pointer"
-              >
-                Refresh
-              </button>
+
+            {/* Card header */}
+            <div className="px-5 sm:px-6 py-4 border-b border-gray-100">
+              <div className="flex flex-wrap items-center gap-3">
+                <h2 className="text-base font-bold text-gray-900 shrink-0">
+                  Users <span className="font-normal text-gray-400">({filtered.length})</span>
+                </h2>
+
+                {/* Search */}
+                <div className="relative flex-1 min-w-[160px]">
+                  <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="Search name or email…"
+                    className="w-full pl-7 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-xs outline-none transition-all focus:border-blue-400 focus:bg-white placeholder:text-gray-400"
+                  />
+                </div>
+
+                {/* Plan filter */}
+                <select value={filterPlan} onChange={e => setFilterPlan(e.target.value)} className={selectCls}>
+                  <option value="all">All plans</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="lifetime">Lifetime</option>
+                </select>
+
+                {/* Status filter */}
+                <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className={selectCls}>
+                  <option value="all">All statuses</option>
+                  <option value="active">Active</option>
+                  <option value="expired">Expired</option>
+                </select>
+
+                <button
+                  onClick={fetchUsers}
+                  className="shrink-0 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 text-xs font-medium hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  Refresh
+                </button>
+              </div>
             </div>
 
             {users.length === 0 ? (
               <div className="px-6 py-16 text-center">
                 <p className="text-sm text-gray-400 mb-1">No users yet</p>
                 <p className="text-xs text-gray-300">Add your first user using the form</p>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="px-6 py-16 text-center">
+                <p className="text-sm text-gray-400 mb-1">No users match your filters</p>
+                <button
+                  onClick={() => { setSearch(''); setFilterPlan('all'); setFilterStatus('all'); }}
+                  className="text-xs text-blue-500 hover:text-blue-700 transition-colors cursor-pointer mt-1"
+                >
+                  Clear filters
+                </button>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -192,11 +262,11 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((row, i) => (
+                    {filtered.map((row, i) => (
                       <TableRow
                         key={row.id}
                         row={row}
-                        last={i === users.length - 1}
+                        last={i === filtered.length - 1}
                         deleting={deletingId === row.id}
                         onDelete={() => handleDelete(row.id, row.user_id)}
                       />
@@ -216,6 +286,7 @@ export default function AdminDashboard() {
 function TableRow({ row, last, deleting, onDelete }) {
   const [hover, setHover] = useState(false);
   const isLifetime = row.plan_type === 'lifetime';
+  const expired = isExpired(row);
 
   return (
     <tr
@@ -239,10 +310,17 @@ function TableRow({ row, last, deleting, onDelete }) {
         {isLifetime ? <span className="text-gray-300">—</span> : fmt(row.expires_at)}
       </td>
       <td className="px-4 sm:px-5 py-3.5">
-        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-1 rounded-md capitalize">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
-          {row.status}
-        </span>
+        {expired ? (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-200 px-2 py-1 rounded-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+            Expired
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-1 rounded-md capitalize">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+            {row.status}
+          </span>
+        )}
       </td>
       <td className="px-4 sm:px-5 py-3.5">
         <button

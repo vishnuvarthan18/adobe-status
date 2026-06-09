@@ -5,6 +5,11 @@ const MS_PER_DAY = 86400000;
 
 export async function POST(request) {
   try {
+    console.log("ENV CHECK:", {
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      anonKeyExists: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      serviceKeyExists: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    });
     console.log('[check-status] Request received');
 
     const supabase = createClient(
@@ -115,6 +120,6 @@ export async function POST(request) {
   } catch (err) {
     console.error('[check-status] UNHANDLED ERROR:', err.message);
     console.error('[check-status] Stack:', err.stack);
-    return Response.json({ success: false, error: err.message }, { status: 500 });
+    return Response.json({ success: false, error: err.message, stack: err.stack }, { status: 500 });
   }
 }
