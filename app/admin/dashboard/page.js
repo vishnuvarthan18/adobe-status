@@ -10,28 +10,12 @@ function fmt(iso) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-const inputSx = {
-  width: '100%',
-  padding: '10px 13px',
-  background: '#F9FAFB',
-  border: '1.5px solid #E5E7EB',
-  borderRadius: '9px',
-  color: '#111827',
-  fontSize: '13.5px',
-  outline: 'none',
-  boxSizing: 'border-box',
-  transition: 'border-color 0.15s, background 0.15s',
-  appearance: 'none',
-  WebkitAppearance: 'none',
-};
-
-function applyFocus(e) { e.target.style.borderColor = '#3B82F6'; e.target.style.background = '#fff'; }
-function removeFocus(e) { e.target.style.borderColor = '#E5E7EB'; e.target.style.background = '#F9FAFB'; }
+const inputCls = 'w-full px-3 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 text-sm outline-none transition-all focus:border-blue-500 focus:bg-white appearance-none';
 
 function FormField({ label, children }) {
   return (
     <div>
-      <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '600', color: '#6B7280', marginBottom: '7px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+      <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">
         {label}
       </label>
       {children}
@@ -106,160 +90,102 @@ export default function AdminDashboard() {
   const logout = () => { localStorage.removeItem('adminLoggedIn'); router.push('/admin'); };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0F172A 0%, #1E3A5F 100%)' }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900">
 
       {/* Header */}
-      <header style={{
-        background: 'rgba(15,23,42,0.85)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        height: '60px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 28px',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img src="/logo.svg" alt="Big Membres" style={{ height: '36px', width: 'auto' }} />
-          <span style={{
-            fontSize: '10.5px', fontWeight: '600',
-            color: 'rgba(248,250,252,0.45)',
-            background: 'rgba(255,255,255,0.07)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            padding: '3px 8px', borderRadius: '5px',
-            letterSpacing: '0.05em', textTransform: 'uppercase',
-          }}>Admin Panel</span>
+      <header className="sticky top-0 z-10 h-14 sm:h-16 bg-slate-900/90 backdrop-blur border-b border-white/10 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <img src="/logo.svg" alt="Big Membres" className="h-8 sm:h-9 w-auto" />
+          <span className="hidden sm:inline text-xs font-semibold text-slate-400 bg-white/[0.07] border border-white/10 px-2 py-0.5 rounded uppercase tracking-widest">
+            Admin Panel
+          </span>
         </div>
         <button
           onClick={logout}
-          style={{
-            padding: '8px 16px',
-            background: 'linear-gradient(135deg, #DC2626, #EF4444)',
-            border: 'none', borderRadius: '8px',
-            color: '#fff', fontSize: '13px', fontWeight: '600',
-            cursor: 'pointer', transition: 'all 0.2s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'linear-gradient(135deg, #B91C1C, #DC2626)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(135deg, #DC2626, #EF4444)'}
+          className="px-3 sm:px-4 py-2 min-h-[40px] bg-gradient-to-br from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 cursor-pointer"
         >
           Logout
         </button>
       </header>
 
       {/* Body */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '36px 24px' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
 
-        <div style={{ marginBottom: '28px' }}>
-          <h1 style={{ fontSize: '22px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 6px', letterSpacing: '-0.5px' }}>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-50 tracking-tight mb-1">
             Subscription Management
           </h1>
-          <p style={{ fontSize: '13.5px', color: 'rgba(248,250,252,0.4)', margin: 0 }}>
-            Add and manage Big Membres subscriptions
-          </p>
+          <p className="text-sm text-slate-400">Add and manage Big Membres subscriptions</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,320px) 1fr', gap: '24px', alignItems: 'start' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-5 lg:gap-6 items-start">
 
           {/* Form card */}
-          <div style={{ background: '#fff', borderRadius: '20px', padding: '28px', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#111827', margin: '0 0 22px', letterSpacing: '-0.3px' }}>
-              Add User
-            </h2>
-            <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="bg-white rounded-2xl p-5 sm:p-7 shadow-2xl">
+            <h2 className="text-base font-bold text-gray-900 mb-5 tracking-tight">Add User</h2>
+            <form onSubmit={handleAdd} className="flex flex-col gap-4">
 
               <FormField label="Full name">
-                <input value={name} onChange={e => setName(e.target.value)} placeholder="Jane Smith" required style={inputSx} onFocus={applyFocus} onBlur={removeFocus} />
+                <input value={name} onChange={e => setName(e.target.value)} placeholder="Jane Smith" required className={inputCls} />
               </FormField>
 
               <FormField label="Email address">
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@company.com" required style={inputSx} onFocus={applyFocus} onBlur={removeFocus} />
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@company.com" required className={inputCls} />
               </FormField>
 
               <FormField label="Plan type">
-                <select value={planType} onChange={e => setPlanType(e.target.value)} style={{ ...inputSx, cursor: 'pointer' }} onFocus={applyFocus} onBlur={removeFocus}>
+                <select value={planType} onChange={e => setPlanType(e.target.value)} className={`${inputCls} cursor-pointer`}>
                   <option value="yearly">Yearly</option>
                   <option value="lifetime">Lifetime</option>
                 </select>
               </FormField>
 
               <FormField label="Start date">
-                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required style={inputSx} onFocus={applyFocus} onBlur={removeFocus} />
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required className={`${inputCls} light-date`} />
               </FormField>
 
               <button
                 type="submit"
                 disabled={loading}
-                style={{
-                  marginTop: '4px', padding: '12px',
-                  background: loading ? '#93C5FD' : 'linear-gradient(135deg, #2563EB, #3B82F6)',
-                  border: 'none', borderRadius: '10px',
-                  color: '#fff', fontSize: '14px', fontWeight: '700',
-                  cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'linear-gradient(135deg, #1D4ED8, #2563EB)'; }}
-                onMouseLeave={e => { if (!loading) e.currentTarget.style.background = 'linear-gradient(135deg, #2563EB, #3B82F6)'; }}
+                className="mt-1 py-3 min-h-[48px] bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-75 text-white text-sm font-bold rounded-xl transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
               >
                 {loading ? 'Adding…' : 'Add User'}
               </button>
 
               {msg && (
-                <div style={{
-                  padding: '10px 13px', borderRadius: '9px',
-                  background: msg.ok ? '#F0FDF4' : '#FEF2F2',
-                  border: `1px solid ${msg.ok ? '#BBF7D0' : '#FECACA'}`,
-                }}>
-                  <p style={{ fontSize: '12.5px', color: msg.ok ? '#15803D' : '#B91C1C', margin: 0 }}>
-                    {msg.ok ? '✓ ' : '✕ '}{msg.text}
-                  </p>
+                <div className={`p-3 rounded-xl border text-sm ${msg.ok ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-700'}`}>
+                  {msg.ok ? '✓ ' : '✕ '}{msg.text}
                 </div>
               )}
             </form>
           </div>
 
           {/* Table card */}
-          <div style={{ background: '#fff', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
-            <div style={{
-              padding: '18px 24px', borderBottom: '1px solid #F3F4F6',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}>
-              <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#111827', margin: 0 }}>
-                Users <span style={{ color: '#9CA3AF', fontWeight: '500' }}>({users.length})</span>
+          <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
+            <div className="px-5 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="text-base font-bold text-gray-900">
+                Users <span className="font-normal text-gray-400">({users.length})</span>
               </h2>
               <button
                 onClick={fetchUsers}
-                style={{
-                  padding: '6px 12px', background: '#F9FAFB',
-                  border: '1px solid #E5E7EB', borderRadius: '7px',
-                  color: '#6B7280', fontSize: '12px', fontWeight: '500', cursor: 'pointer', transition: 'all 0.15s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = '#F3F4F6'}
-                onMouseLeave={e => e.currentTarget.style.background = '#F9FAFB'}
+                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 text-xs font-medium hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 Refresh
               </button>
             </div>
 
             {users.length === 0 ? (
-              <div style={{ padding: '64px 24px', textAlign: 'center' }}>
-                <p style={{ fontSize: '14px', color: '#9CA3AF', margin: '0 0 6px' }}>No users yet</p>
-                <p style={{ fontSize: '12.5px', color: '#D1D5DB', margin: 0 }}>Add your first user using the form</p>
+              <div className="px-6 py-16 text-center">
+                <p className="text-sm text-gray-400 mb-1">No users yet</p>
+                <p className="text-xs text-gray-300">Add your first user using the form</p>
               </div>
             ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse min-w-[560px]">
                   <thead>
-                    <tr style={{ background: '#F9FAFB' }}>
+                    <tr className="bg-gray-50">
                       {['Name', 'Email', 'Plan', 'Start', 'Expires', 'Status', ''].map(h => (
-                        <th key={h} style={{
-                          textAlign: 'left', padding: '10px 16px',
-                          fontSize: '11px', fontWeight: '600', color: '#9CA3AF',
-                          borderBottom: '1px solid #F3F4F6',
-                          whiteSpace: 'nowrap', letterSpacing: '0.04em', textTransform: 'uppercase',
-                        }}>
+                        <th key={h} className="text-left px-4 sm:px-5 py-3 text-xs font-semibold text-gray-400 border-b border-gray-100 whitespace-nowrap uppercase tracking-wider">
                           {h}
                         </th>
                       ))}
@@ -295,57 +221,34 @@ function TableRow({ row, last, deleting, onDelete }) {
     <tr
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      style={{
-        borderBottom: last ? 'none' : '1px solid #F9FAFB',
-        background: hover ? '#FAFAFA' : '#fff',
-        transition: 'background 0.1s',
-      }}
+      className={`transition-colors duration-100 ${!last ? 'border-b border-gray-50' : ''} ${hover ? 'bg-gray-50' : 'bg-white'}`}
     >
-      <td style={{ padding: '14px 16px', fontSize: '13.5px', color: '#111827', fontWeight: '600', whiteSpace: 'nowrap' }}>
+      <td className="px-4 sm:px-5 py-3.5 text-sm font-semibold text-gray-900 whitespace-nowrap">
         {row.users?.name || '—'}
       </td>
-      <td style={{ padding: '14px 16px', fontSize: '13px', color: '#6B7280', whiteSpace: 'nowrap' }}>
+      <td className="px-4 sm:px-5 py-3.5 text-sm text-gray-500 whitespace-nowrap">
         {row.users?.email || '—'}
       </td>
-      <td style={{ padding: '14px 16px' }}>
-        <span style={{
-          fontSize: '11.5px', fontWeight: '600',
-          color: isLifetime ? '#7C3AED' : '#2563EB',
-          background: isLifetime ? '#F5F3FF' : '#EFF6FF',
-          border: `1px solid ${isLifetime ? '#DDD6FE' : '#BFDBFE'}`,
-          padding: '3px 9px', borderRadius: '6px', textTransform: 'capitalize',
-        }}>
+      <td className="px-4 sm:px-5 py-3.5">
+        <span className={`text-xs font-semibold px-2 py-1 rounded-md capitalize ${isLifetime ? 'text-violet-700 bg-violet-50 border border-violet-200' : 'text-blue-700 bg-blue-50 border border-blue-200'}`}>
           {row.plan_type}
         </span>
       </td>
-      <td style={{ padding: '14px 16px', fontSize: '13px', color: '#6B7280', whiteSpace: 'nowrap' }}>
-        {fmt(row.activated_at)}
+      <td className="px-4 sm:px-5 py-3.5 text-sm text-gray-500 whitespace-nowrap">{fmt(row.activated_at)}</td>
+      <td className="px-4 sm:px-5 py-3.5 text-sm text-gray-500 whitespace-nowrap">
+        {isLifetime ? <span className="text-gray-300">—</span> : fmt(row.expires_at)}
       </td>
-      <td style={{ padding: '14px 16px', fontSize: '13px', color: '#6B7280', whiteSpace: 'nowrap' }}>
-        {isLifetime ? <span style={{ color: '#D1D5DB' }}>—</span> : fmt(row.expires_at)}
-      </td>
-      <td style={{ padding: '14px 16px' }}>
-        <span style={{
-          display: 'inline-flex', alignItems: 'center', gap: '5px',
-          fontSize: '11.5px', fontWeight: '600', color: '#15803D',
-          background: '#F0FDF4', border: '1px solid #BBF7D0',
-          padding: '3px 9px', borderRadius: '6px', textTransform: 'capitalize',
-        }}>
-          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16A34A' }} />
+      <td className="px-4 sm:px-5 py-3.5">
+        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-1 rounded-md capitalize">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
           {row.status}
         </span>
       </td>
-      <td style={{ padding: '14px 16px' }}>
+      <td className="px-4 sm:px-5 py-3.5">
         <button
           onClick={onDelete}
           disabled={deleting}
-          style={{
-            background: 'none', border: 'none',
-            cursor: deleting ? 'not-allowed' : 'pointer',
-            fontSize: '12.5px', fontWeight: '500',
-            color: '#EF4444', padding: 0,
-            opacity: deleting ? 0.5 : 1, transition: 'opacity 0.15s',
-          }}
+          className="text-xs font-medium text-red-400 hover:text-red-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[32px] flex items-center"
         >
           {deleting ? '…' : 'Remove'}
         </button>

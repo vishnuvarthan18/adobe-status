@@ -32,15 +32,11 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
-input[type="date"] { color-scheme: dark; }
-input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0.4;
+/* Light date input (used in admin form) */
+input[type="date"].light-date { color-scheme: light; }
+input[type="date"].light-date::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
   cursor: pointer;
-}
-
-select option {
-  background: #1A1A1A;
-  color: #EBEBEB;
 }
 
 @keyframes spin {

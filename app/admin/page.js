@@ -25,72 +25,40 @@ export default function AdminLogin() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0F172A 0%, #1E3A5F 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px',
-    }}>
-      <div style={{ width: '100%', maxWidth: '380px' }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-sm">
 
-        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+        <div className="text-center mb-8 sm:mb-10">
           <img
             src="/logo.svg"
             alt="Big Membres"
-            style={{ width: '80px', height: '80px', objectFit: 'contain', display: 'block', margin: '0 auto 20px' }}
+            className="w-20 h-20 object-contain block mx-auto mb-4 sm:mb-5"
           />
-          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px', letterSpacing: '-0.5px' }}>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-50 tracking-tight mb-2">
             Welcome back
           </h1>
-          <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.48)', margin: 0 }}>
-            Sign in to the Big Membres admin portal
-          </p>
+          <p className="text-sm text-slate-400">Sign in to the Big Membres admin portal</p>
         </div>
 
-        <div style={{
-          background: '#fff',
-          borderRadius: '20px',
-          padding: '32px',
-          boxShadow: '0 24px 64px rgba(0,0,0,0.45)',
-        }}>
-          <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '600', color: '#374151', marginBottom: '9px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-2xl">
+          <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
             Password
           </label>
 
-          <div style={{ position: 'relative', marginBottom: error ? '12px' : '20px' }}>
+          <div className="relative mb-4">
             <input
               type={showPass ? 'text' : 'password'}
               value={password}
               onChange={e => { setPassword(e.target.value); if (error) setError(''); }}
               onKeyDown={e => e.key === 'Enter' && attempt()}
               placeholder="Enter password"
-              style={{
-                width: '100%',
-                padding: '12px 44px 12px 14px',
-                background: '#F9FAFB',
-                border: '1.5px solid #E5E7EB',
-                borderRadius: '10px',
-                color: '#111827',
-                fontSize: '14px',
-                outline: 'none',
-                boxSizing: 'border-box',
-                transition: 'border-color 0.15s, background 0.15s',
-              }}
-              onFocus={e => { e.target.style.borderColor = '#3B82F6'; e.target.style.background = '#fff'; }}
-              onBlur={e => { e.target.style.borderColor = '#E5E7EB'; e.target.style.background = '#F9FAFB'; }}
+              className="w-full pr-11 pl-3.5 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 text-sm outline-none transition-all focus:border-blue-500 focus:bg-white"
             />
             <button
               type="button"
               onClick={() => setShowPass(v => !v)}
               tabIndex={-1}
-              style={{
-                position: 'absolute', right: '12px', top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: '#9CA3AF', padding: '4px', display: 'flex',
-              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 cursor-pointer"
             >
               {showPass
                 ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19M1 1l22 22" /></svg>
@@ -100,37 +68,22 @@ export default function AdminLogin() {
           </div>
 
           {error && (
-            <div style={{
-              marginBottom: '16px', padding: '10px 14px',
-              background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '9px',
-            }}>
-              <p style={{ fontSize: '13px', color: '#B91C1C', margin: 0 }}>{error}</p>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
 
           <button
             onClick={attempt}
             disabled={loading}
-            style={{
-              width: '100%', padding: '13px',
-              background: loading
-                ? 'linear-gradient(135deg, #93C5FD, #60A5FA)'
-                : 'linear-gradient(135deg, #2563EB, #3B82F6)',
-              border: 'none', borderRadius: '10px',
-              color: '#fff', fontSize: '14px', fontWeight: '700',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s', letterSpacing: '-0.1px',
-              opacity: loading ? 0.8 : 1,
-            }}
-            onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'linear-gradient(135deg, #1D4ED8, #2563EB)'; }}
-            onMouseLeave={e => { if (!loading) e.currentTarget.style.background = 'linear-gradient(135deg, #2563EB, #3B82F6)'; }}
+            className="w-full py-3 min-h-[48px] bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-75 text-white text-sm font-bold rounded-xl transition-all duration-200 cursor-pointer disabled:cursor-not-allowed tracking-tight"
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '28px', fontSize: '11px', color: 'rgba(248,250,252,0.2)', letterSpacing: '0.08em' }}>
-          BIG MEMBRES · ADMIN PORTAL
+        <p className="text-center mt-7 text-xs tracking-widest uppercase" style={{ color: 'rgba(248,250,252,0.2)' }}>
+          Big Membres · Admin Portal
         </p>
       </div>
     </div>

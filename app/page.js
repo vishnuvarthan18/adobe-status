@@ -35,70 +35,46 @@ export default function Home() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0F172A 0%, #1E3A5F 100%)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '64px 20px 80px',
-    }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 flex flex-col items-center px-4 py-12 sm:py-16 lg:py-20">
 
-      <div style={{ textAlign: 'center', marginBottom: '44px' }}>
+      <div className="text-center mb-10 sm:mb-12">
         <img
           src="/logo.svg"
           alt="Big Membres"
-          style={{ width: '88px', height: '88px', objectFit: 'contain', display: 'block', margin: '0 auto 20px' }}
+          className="w-20 h-20 sm:w-24 sm:h-24 object-contain block mx-auto mb-4 sm:mb-5"
         />
-        <h1 style={{ fontSize: '30px', fontWeight: '700', color: '#F8FAFC', margin: '0 0 8px', letterSpacing: '-0.6px' }}>
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-50 tracking-tight mb-2">
           Check Subscription
         </h1>
-        <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.48)', margin: 0 }}>
+        <p className="text-sm text-slate-400">
           Enter your registered email to view your plan details
         </p>
       </div>
 
-      <div style={{ width: '100%', maxWidth: '480px' }}>
+      <div className="w-full max-w-lg">
 
-        <div style={{
-          background: '#fff',
-          borderRadius: '20px',
-          padding: '28px',
-          boxShadow: '0 24px 64px rgba(0,0,0,0.45)',
-          marginBottom: '16px',
-        }}>
-          <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '600', color: '#374151', marginBottom: '9px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+        <div className="bg-white rounded-2xl p-5 sm:p-7 shadow-2xl mb-4">
+          <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
             Email address
           </label>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div className="flex gap-2">
             <input
               type="email"
               value={email}
               onChange={e => { setEmail(e.target.value); if (error) setError(''); }}
               onKeyDown={e => e.key === 'Enter' && handleCheck()}
               placeholder="you@company.com"
-              style={{
-                flex: 1, padding: '11px 14px',
-                background: '#F9FAFB', border: '1.5px solid #E5E7EB',
-                borderRadius: '10px', color: '#111827', fontSize: '14px', outline: 'none',
-                transition: 'border-color 0.15s, background 0.15s',
-              }}
-              onFocus={e => { e.target.style.borderColor = '#3B82F6'; e.target.style.background = '#fff'; }}
-              onBlur={e => { e.target.style.borderColor = '#E5E7EB'; e.target.style.background = '#F9FAFB'; }}
+              className="flex-1 min-w-0 px-3 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 text-sm outline-none transition-all focus:border-blue-500 focus:bg-white"
             />
             <CheckButton loading={loading} onClick={handleCheck} />
           </div>
 
           {error && (
-            <div style={{
-              marginTop: '14px', padding: '12px 14px',
-              background: '#FEF2F2', border: '1px solid #FECACA',
-              borderRadius: '10px', display: 'flex', gap: '9px', alignItems: 'flex-start',
-            }}>
-              <svg style={{ marginTop: '1px', flexShrink: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round">
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl flex gap-2 items-start">
+              <svg className="mt-0.5 shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round">
                 <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
-              <span style={{ fontSize: '13px', color: '#B91C1C', lineHeight: '1.5' }}>{error}</span>
+              <span className="text-sm text-red-700 leading-relaxed">{error}</span>
             </div>
           )}
         </div>
@@ -106,7 +82,7 @@ export default function Home() {
         {result && <SubscriptionCard result={result} />}
       </div>
 
-      <p style={{ marginTop: '52px', fontSize: '11px', color: 'rgba(248,250,252,0.18)', letterSpacing: '0.08em' }}>
+      <p className="mt-12 text-xs tracking-widest" style={{ color: 'rgba(248,250,252,0.2)' }}>
         © Big Membres · Subscription Portal
       </p>
     </div>
@@ -114,25 +90,11 @@ export default function Home() {
 }
 
 function CheckButton({ loading, onClick }) {
-  const [hov, setHov] = useState(false);
   return (
     <button
       onClick={onClick}
       disabled={loading}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      style={{
-        padding: '11px 20px',
-        background: hov && !loading
-          ? 'linear-gradient(135deg, #1D4ED8, #2563EB)'
-          : 'linear-gradient(135deg, #2563EB, #3B82F6)',
-        border: 'none', borderRadius: '10px', color: '#fff',
-        fontSize: '14px', fontWeight: '600',
-        cursor: loading ? 'not-allowed' : 'pointer',
-        whiteSpace: 'nowrap', transition: 'all 0.2s',
-        display: 'flex', alignItems: 'center', gap: '7px',
-        opacity: loading ? 0.75 : 1, flexShrink: 0,
-      }}
+      className="shrink-0 px-4 sm:px-5 min-h-[48px] bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 disabled:opacity-75 text-white text-sm font-semibold rounded-xl transition-all duration-200 flex items-center gap-2 whitespace-nowrap cursor-pointer disabled:cursor-not-allowed"
     >
       {loading && (
         <svg style={{ animation: 'spin 0.75s linear infinite' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -149,101 +111,73 @@ function SubscriptionCard({ result }) {
   const isActive = result.status === 'active' && (isLifetime || result.daysRemaining > 0);
 
   return (
-    <div style={{
-      background: '#fff', borderRadius: '20px', overflow: 'hidden',
-      boxShadow: '0 24px 64px rgba(0,0,0,0.45)',
-      animation: 'fadeInUp 0.5s ease forwards',
-    }}>
+    <div className="bg-white rounded-2xl overflow-hidden shadow-2xl" style={{ animation: 'fadeInUp 0.5s ease forwards' }}>
 
-      {/* Header strip */}
-      <div style={{
-        padding: '16px 24px',
-        background: isActive ? 'linear-gradient(135deg, #F0FDF4, #DCFCE7)' : 'linear-gradient(135deg, #FFF1F2, #FEE2E2)',
-        borderBottom: `1px solid ${isActive ? '#BBF7D0' : '#FECACA'}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
+      <div
+        className="px-5 sm:px-6 py-4 flex items-center justify-between border-b"
+        style={{
+          background: isActive ? 'linear-gradient(135deg,#F0FDF4,#DCFCE7)' : 'linear-gradient(135deg,#FFF1F2,#FEE2E2)',
+          borderColor: isActive ? '#BBF7D0' : '#FECACA',
+        }}
+      >
         <StatusBadge active={isActive} />
-        <span style={{ fontSize: '12px', color: '#9CA3AF', fontFamily: 'monospace' }}>{result.email}</span>
+        <span className="text-xs text-gray-400 font-mono truncate ml-3 max-w-[160px] sm:max-w-xs">{result.email}</span>
       </div>
 
-      <div style={{ padding: '24px' }}>
+      <div className="p-5 sm:p-6">
 
-        {/* Name + org */}
-        <div style={{ marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#111827', margin: '0 0 4px', letterSpacing: '-0.4px' }}>
-            {result.name}
-          </h2>
-          <p style={{ fontSize: '13.5px', color: '#6B7280', margin: 0 }}>{result.organization}</p>
+        <div className="mb-5">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight mb-1">{result.name}</h2>
+          <p className="text-sm text-gray-500">{result.organization}</p>
         </div>
 
-        {/* Plan tile */}
-        <div style={{
-          padding: '14px 16px', background: '#F8FAFC',
-          border: '1px solid #E2E8F0', borderRadius: '12px', marginBottom: '20px',
-        }}>
-          <p style={{ fontSize: '11px', fontWeight: '600', color: '#9CA3AF', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Plan
-          </p>
-          <p style={{ fontSize: '14px', fontWeight: '600', color: '#111827', margin: 0, textTransform: 'capitalize' }}>
-            {result.planType}
-          </p>
+        <div className="p-3 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl mb-5">
+          <p className="text-xs font-semibold text-gray-400 mb-1 uppercase tracking-widest">Plan</p>
+          <p className="text-sm font-semibold text-gray-900 capitalize">{result.planType}</p>
         </div>
 
-        <Divider />
+        <hr className="border-gray-100 mb-4" />
 
-        {/* Dates */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', margin: '18px 0' }}>
+        <div className="flex flex-col gap-2.5 mb-5">
           <DateRow label="Activated" value={formatDate(result.activatedAt)} />
           {!isLifetime && <DateRow label="Expires" value={formatDate(result.expiresAt)} />}
         </div>
 
-        <Divider />
+        <hr className="border-gray-100 mb-4" />
 
-        {/* Progress */}
-        <div style={{ margin: '18px 0' }}>
+        <div className="mb-5">
           {isLifetime ? (
-            <div style={{
-              padding: '14px 16px', background: '#F5F3FF',
-              border: '1px solid #DDD6FE', borderRadius: '12px',
-              display: 'flex', alignItems: 'center', gap: '10px',
-            }}>
+            <div className="p-3 sm:p-4 bg-violet-50 border border-violet-200 rounded-xl flex items-center gap-2.5">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
               </svg>
-              <span style={{ fontSize: '13.5px', fontWeight: '600', color: '#5B21B6' }}>
-                Lifetime access · No expiration date
-              </span>
+              <span className="text-sm font-semibold text-violet-700">Lifetime access · No expiration date</span>
             </div>
           ) : (
             <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <span style={{ fontSize: '13px', color: '#6B7280' }}>Subscription progress</span>
-                <span style={{ fontSize: '15px', fontWeight: '700', color: isActive ? '#16A34A' : '#DC2626' }}>
+              <div className="flex justify-between items-center mb-2.5">
+                <span className="text-sm text-gray-500">Subscription progress</span>
+                <span className="text-sm sm:text-base font-bold" style={{ color: isActive ? '#16A34A' : '#DC2626' }}>
                   {result.daysRemaining > 0 ? `${result.daysRemaining} days left` : 'Expired'}
                 </span>
               </div>
               <AnimatedProgressBar percent={result.progressPercent} active={isActive} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px' }}>
-                <span style={{ fontSize: '11px', color: '#D1D5DB' }}>Start</span>
-                <span style={{ fontSize: '11px', fontWeight: '500', color: '#6B7280' }}>{result.progressPercent}% complete</span>
-                <span style={{ fontSize: '11px', color: '#D1D5DB' }}>Expiry</span>
+              <div className="flex justify-between mt-1.5">
+                <span className="text-xs text-gray-300">Start</span>
+                <span className="text-xs font-medium text-gray-500">{result.progressPercent}% complete</span>
+                <span className="text-xs text-gray-300">Expiry</span>
               </div>
             </>
           )}
         </div>
 
-        <Divider />
+        <hr className="border-gray-100 mb-4" />
 
-        {/* Info box */}
-        <div style={{
-          marginTop: '18px', padding: '14px 16px',
-          background: '#EFF6FF', border: '1px solid #BFDBFE',
-          borderRadius: '12px', display: 'flex', gap: '10px', alignItems: 'flex-start',
-        }}>
-          <svg style={{ marginTop: '1px', flexShrink: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round">
+        <div className="p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-xl flex gap-2.5 items-start">
+          <svg className="mt-0.5 shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round">
             <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
           </svg>
-          <p style={{ fontSize: '12.5px', color: '#1E40AF', margin: 0, lineHeight: '1.55' }}>
+          <p className="text-xs sm:text-sm text-blue-800 leading-relaxed">
             If you need to update your subscription or have billing questions, please contact Big Membres support.
           </p>
         </div>
@@ -255,15 +189,15 @@ function SubscriptionCard({ result }) {
 
 function StatusBadge({ active }) {
   return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: '6px',
-      padding: '5px 12px',
-      background: active ? '#DCFCE7' : '#FEE2E2',
-      border: `1px solid ${active ? '#86EFAC' : '#FECACA'}`,
-      borderRadius: '99px',
-    }}>
-      <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: active ? '#16A34A' : '#DC2626' }} />
-      <span style={{ fontSize: '12px', fontWeight: '700', color: active ? '#15803D' : '#DC2626', letterSpacing: '0.02em' }}>
+    <div
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border shrink-0"
+      style={{
+        background: active ? '#DCFCE7' : '#FEE2E2',
+        borderColor: active ? '#86EFAC' : '#FECACA',
+      }}
+    >
+      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: active ? '#16A34A' : '#DC2626' }} />
+      <span className="text-xs font-bold" style={{ color: active ? '#15803D' : '#DC2626' }}>
         {active ? 'Active' : 'Expired'}
       </span>
     </div>
@@ -272,15 +206,11 @@ function StatusBadge({ active }) {
 
 function DateRow({ label, value }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span style={{ fontSize: '13.5px', color: '#6B7280' }}>{label}</span>
-      <span style={{ fontSize: '13.5px', fontWeight: '600', color: '#111827' }}>{value}</span>
+    <div className="flex justify-between items-center gap-4">
+      <span className="text-sm text-gray-500">{label}</span>
+      <span className="text-sm font-semibold text-gray-900">{value}</span>
     </div>
   );
-}
-
-function Divider() {
-  return <hr style={{ border: 'none', borderTop: '1px solid #F3F4F6', margin: 0 }} />;
 }
 
 function AnimatedProgressBar({ percent, active }) {
@@ -291,15 +221,15 @@ function AnimatedProgressBar({ percent, active }) {
   }, [percent]);
 
   return (
-    <div style={{ height: '10px', background: '#F3F4F6', borderRadius: '99px', overflow: 'hidden' }}>
-      <div style={{
-        height: '100%', width: `${width}%`,
-        background: active
-          ? 'linear-gradient(90deg, #22C55E, #16A34A)'
-          : 'linear-gradient(90deg, #EF4444, #DC2626)',
-        borderRadius: '99px',
-        transition: 'width 1s ease-out',
-      }} />
+    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+      <div
+        className="h-full rounded-full"
+        style={{
+          width: `${width}%`,
+          background: active ? 'linear-gradient(90deg,#22C55E,#16A34A)' : 'linear-gradient(90deg,#EF4444,#DC2626)',
+          transition: 'width 1s ease-out',
+        }}
+      />
     </div>
   );
 }
