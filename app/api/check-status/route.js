@@ -1,15 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 import { getCached, setCached } from '../../lib/statusCache.js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
 const MS_PER_DAY = 86400000;
 
 export async function POST(request) {
   try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
     const { email } = await request.json();
     if (!email) return Response.json({ found: false, error: 'Email is required' }, { status: 400 });
 
