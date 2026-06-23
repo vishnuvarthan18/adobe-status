@@ -1,5 +1,5 @@
 // app/api/admin/requests/route.js
-// GET  — list subscription requests that are ready for admin action
+// GET  — list all subscription requests (most recent first)
 // POST — approve or reject a pending request
 
 import { createClient } from '@supabase/supabase-js';
@@ -12,42 +12,6 @@ function getSupabase() {
   );
 }
 
-// ── Business hours queue ──────────────────────────────────────────────────────
-const BIZ_TZ    = process.env.BUSINESS_TIMEZONE || 'Asia/Kolkata';
-const BIZ_OPEN  = 9;   // 9 AM
-const BIZ_CLOSE = 18;  // 6 PM
-
-function getBizHour(date) {
-  return parseInt(
-    new Intl.DateTimeFormat('en-US', { timeZone: BIZ_TZ, hour: 'numeric', hour12: false }).format(date),
-    10
-  );
-}
-
-// Returns the UTC Date when the request becomes visible to admin.
-// Returns null if submitted during business hours (available immediately).
-function queuedUntil(requestedAt) {
-  const date  = new Date(requestedAt);
-  const hour  = getBizHour(date);
-  if (hour >= BIZ_OPEN && hour < BIZ_CLOSE) return null; // already within hours
-
-  // Compute next 9 AM in biz timezone
-  const base = hour >= BIZ_CLOSE
-    ? new Date(date.getTime() + 24 * 60 * 60 * 1000) // after close → tomorrow
-    : date;                                             // before open → today
-
-  const dtParts = {};
-  new Intl.DateTimeFormat('en-US', {
-    timeZone: BIZ_TZ, year: 'numeric', month: '2-digit', day: '2-digit',
-  }).formatToParts(base).forEach(p => { if (p.type !== 'literal') dtParts[p.type] = p.value; });
-
-  // Build "09:00 on that date" as UTC, then correct for timezone offset
-  const naiveUTC   = new Date(`${dtParts.year}-${dtParts.month}-${dtParts.day}T09:00:00Z`);
-  const actualHour = getBizHour(naiveUTC);
-  return new Date(naiveUTC.getTime() + (BIZ_OPEN - actualHour) * 3600000);
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
 export async function GET() {
   const supabase = getSupabase();
   const { data, error } = await supabase
@@ -56,16 +20,7 @@ export async function GET() {
     .order('requested_at', { ascending: false });
 
   if (error) return Response.json({ error: error.message }, { status: 500 });
-
-  const now = Date.now();
-  // Hide pending requests that are still in the business-hours queue
-  const visible = (data || []).filter(req => {
-    if (req.status !== 'pending') return true; // always show approved / rejected
-    const until = queuedUntil(req.requested_at);
-    return !until || until.getTime() <= now;
-  });
-
-  return Response.json({ requests: visible });
+  return Response.json({ requests: data || [] });
 }
 
 export async function POST(request) {
@@ -90,26 +45,6 @@ export async function POST(request) {
     // ── APPROVE ──────────────────────────────────────────────
     if (action === 'approve') {
 
-      // 0. Duplicate email guard — block if email already has an active subscription
-      const { data: existingSub } = await supabase
-        .from('subscriptions')
-        .select('id')
-        .eq('user_id', (await supabase.from('users').select('id').eq('email', req.user_email).maybeSingle()).data?.id)
-        .eq('status', 'active')
-        .maybeSingle();
-
-      // Simpler duplicate check: look for any other approved request with same email
-      const { data: alreadyApproved } = await supabase
-        .from('subscription_requests')
-        .select('id')
-        .eq('user_email', req.user_email)
-        .eq('status', 'approved')
-        .maybeSingle();
-
-      if (alreadyApproved) {
-        return Response.json({ error: `${req.user_email} already has an approved subscription.` }, { status: 409 });
-      }
-
       // 1. Upsert user into main users table
       const { data: insertedUser, error: userError } = await supabase
         .from('users')
@@ -132,11 +67,10 @@ export async function POST(request) {
       }
 
       // 2. Create subscription
-      const approvedAt = new Date(); // exact approval timestamp — used for activated_at and revoke window
-      const startDate  = req.start_date ? new Date(req.start_date) : approvedAt;
+      const now        = req.start_date ? new Date(req.start_date) : new Date();
       const expiryDate = req.plan_type === 'lifetime'
-        ? new Date(startDate.getTime() + 100 * 365 * 24 * 60 * 60 * 1000)
-        : new Date(startDate.getTime() +       365 * 24 * 60 * 60 * 1000);
+        ? new Date(now.getTime() + 100 * 365 * 24 * 60 * 60 * 1000)
+        : new Date(now.getTime() +       365 * 24 * 60 * 60 * 1000);
 
       const { data: sub, error: subError } = await supabase
         .from('subscriptions')
@@ -145,7 +79,7 @@ export async function POST(request) {
           plan_name:            'Creative Cloud Pro Configuration',
           plan_type:            req.plan_type,
           organization_name:    '',
-          activated_at:         approvedAt.toISOString(),
+          activated_at:         now.toISOString(),
           expires_at:           expiryDate.toISOString(),
           status:               'active',
           progress_percent:     0,
@@ -157,26 +91,25 @@ export async function POST(request) {
 
       if (subError) return Response.json({ error: 'Failed to create subscription: ' + subError.message }, { status: 500 });
 
-      // 3. Update request status — only update columns that exist in schema
-      const { error: updateErr } = await supabase
-        .from('subscription_requests')
-        .update({ status: 'approved' })
-        .eq('id', requestId);
-
-      if (updateErr) {
-        // Rollback: delete the subscription we just created
-        await supabase.from('subscriptions').delete().eq('id', sub.id);
-        return Response.json({ error: 'Failed to update request status: ' + updateErr.message }, { status: 500 });
-      }
+      // 3. Update request — mark approved, set 12hr revoke window
+      const revokeWindowExpires = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
+      await supabase.from('subscription_requests').update({
+        status:                   'approved',
+        subscription_id:          sub.id,
+        user_id:                  userId,
+        resolved_at:              new Date().toISOString(),
+        revoke_window_expires_at: revokeWindowExpires,
+        notes,
+      }).eq('id', requestId);
 
       // 4. Send activation email via Resend
       try {
         const resend  = new Resend(process.env.RESEND_API_KEY);
         const isLifetime = req.plan_type === 'lifetime';
         await resend.emails.send({
-          from:    process.env.RESEND_FROM_EMAIL || 'noreply@mgdigital.com',
+          from:    process.env.RESEND_FROM_EMAIL || 'noreply@bigmembres.com',
           to:      req.user_email,
-          subject: 'Your subscription is now active — MG Digital',
+          subject: 'Your subscription is now active — Big Membres',
           html: `
             <div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;">
               <h1 style="font-size:22px;font-weight:700;color:#0f172a;margin:0 0 6px;">Hi ${req.user_name} 👋</h1>
@@ -187,7 +120,7 @@ export async function POST(request) {
                   <tr><td style="padding:6px 0;color:#64748b;font-size:14px;">Plan</td>
                       <td style="padding:6px 0;font-weight:600;color:#4f46e5;font-size:14px;text-align:right;text-transform:capitalize;">${req.plan_type}</td></tr>
                   <tr><td style="padding:6px 0;color:#64748b;font-size:14px;">Activated</td>
-                      <td style="padding:6px 0;font-weight:600;color:#0f172a;font-size:14px;text-align:right;">${approvedAt.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</td></tr>
+                      <td style="padding:6px 0;font-weight:600;color:#0f172a;font-size:14px;text-align:right;">${now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</td></tr>
                   ${!isLifetime
                     ? `<tr><td style="padding:6px 0;color:#64748b;font-size:14px;">Expires</td>
                            <td style="padding:6px 0;font-weight:600;color:#0f172a;font-size:14px;text-align:right;">${expiryDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</td></tr>`
@@ -202,7 +135,7 @@ export async function POST(request) {
                 Check Status
               </a>
               <p style="color:#94a3b8;font-size:12px;margin-top:32px;border-top:1px solid #e2e8f0;padding-top:16px;">
-                MG Digital · Subscription Portal
+                Big Membres · Subscription Portal
               </p>
             </div>
           `,
@@ -241,12 +174,11 @@ export async function POST(request) {
         created_by:   'admin',
       }]);
 
-      const { error: rejectErr } = await supabase
-        .from('subscription_requests')
-        .update({ status: 'rejected' })
-        .eq('id', requestId);
-
-      if (rejectErr) return Response.json({ error: 'Failed to update request status: ' + rejectErr.message }, { status: 500 });
+      await supabase.from('subscription_requests').update({
+        status:      'rejected',
+        resolved_at: new Date().toISOString(),
+        notes,
+      }).eq('id', requestId);
 
       await supabase.from('activity_logs').insert([{
         actor_type: 'admin',

@@ -237,10 +237,10 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-slate-900 to-blue-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900">
 
       {/* ── Header ── */}
-      <header className="shrink-0 z-10 h-14 sm:h-16 bg-slate-900/90 backdrop-blur border-b border-white/10 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-10 h-14 sm:h-16 bg-slate-900/90 backdrop-blur border-b border-white/10 flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 sm:gap-3">
           <img src="/logo.svg" alt="Big Membres" className="h-8 sm:h-9 w-auto" />
           <span className="hidden sm:inline text-xs font-semibold text-slate-400 bg-white/[0.07] border border-white/10 px-2 py-0.5 rounded uppercase tracking-widest">
@@ -253,32 +253,27 @@ export default function AdminDashboard() {
         </button>
       </header>
 
-      <div className="shrink-0 bg-slate-900/80 backdrop-blur border-b border-white/10 px-4 sm:px-6 lg:px-8 pt-5 pb-3">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-4">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-50 mb-1">Admin Dashboard</h1>
-            <p className="text-sm text-slate-400">Big Membres · Subscription Management</p>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
 
-          {/* ── Tab bar ── */}
-          <div className="flex flex-wrap gap-1 bg-white/10 rounded-xl p-1 w-fit">
-            {TABS.map(({ key, label, badge }) => (
-              <button key={key} onClick={() => setActiveTab(key)}
-                className={`relative px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
-                  activeTab === key ? 'bg-white text-gray-900 shadow-sm' : 'text-slate-300 hover:text-white'
-                }`}>
-                {label}
-                {badge > 0 && (
-                  <span className="ml-1.5 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{badge}</span>
-                )}
-              </button>
-            ))}
-          </div>
+        <div className="mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-50 mb-1">Admin Dashboard</h1>
+          <p className="text-sm text-slate-400">Big Membres · Subscription Management</p>
         </div>
-      </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* ── Tab bar ── */}
+        <div className="flex flex-wrap gap-1 bg-white/10 rounded-xl p-1 mb-6 w-fit">
+          {TABS.map(({ key, label, badge }) => (
+            <button key={key} onClick={() => setActiveTab(key)}
+              className={`relative px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === key ? 'bg-white text-gray-900 shadow-sm' : 'text-slate-300 hover:text-white'
+              }`}>
+              {label}
+              {badge > 0 && (
+                <span className="ml-1.5 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{badge}</span>
+              )}
+            </button>
+          ))}
+        </div>
 
         {/* ══════════════════════════════════════════════
             TAB: Users  (existing functionality)
@@ -398,39 +393,29 @@ export default function AdminDashboard() {
         ══════════════════════════════════════════════ */}
         {activeTab === 'requests' && (
           <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
-            <div className="px-5 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+            <div className="px-5 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold text-gray-900">Subscription Requests</h2>
-                <p className="text-xs text-gray-400 mt-0.5">Approve to activate · Reject to refund credit</p>
+                <p className="text-xs text-gray-400 mt-0.5">Submitted by Client X — approve to activate, reject to refund credit</p>
               </div>
-              <div className="flex items-center gap-2">
-                <select id="reqFilter" defaultValue="pending" onChange={e => {
-                  const val = e.target.value;
-                  document.getElementById('reqFilter').__filterVal = val;
-                  // force re-render via a no-op state update trick — we'll filter inline below
-                }} className="px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-600 text-xs font-medium outline-none cursor-pointer">
-                  <option value="pending">Pending only</option>
-                  <option value="all">All requests</option>
-                </select>
-                <button onClick={fetchAll} className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 text-xs font-medium hover:bg-gray-100 cursor-pointer">Refresh</button>
-              </div>
+              <button onClick={fetchAll} className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-500 text-xs font-medium hover:bg-gray-100 cursor-pointer">Refresh</button>
             </div>
 
-            {requests.filter(r => r.status === 'pending').length === 0 ? (
-              <div className="px-6 py-16 text-center text-sm text-gray-400">No pending requests</div>
+            {requests.length === 0 ? (
+              <div className="px-6 py-16 text-center text-sm text-gray-400">No requests yet</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse min-w-[700px]">
                   <thead>
                     <tr className="bg-gray-50">
-                      {['From Client', 'User Name', 'User Email', 'Plan', 'Start Date', 'Requested', 'Actions'].map(h => (
+                      {['From Client', 'User Name', 'User Email', 'Plan', 'Start Date', 'Requested', 'Status', 'Actions'].map(h => (
                         <th key={h} className="text-left px-4 sm:px-5 py-3 text-xs font-semibold text-gray-400 border-b border-gray-100 whitespace-nowrap uppercase tracking-wider">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {requests.filter(r => r.status === 'pending').map((req, i, arr) => (
-                      <tr key={req.id} className={`transition-colors hover:bg-gray-50 ${i < arr.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                    {requests.map((req, i) => (
+                      <tr key={req.id} className={`transition-colors hover:bg-gray-50 ${i < requests.length - 1 ? 'border-b border-gray-50' : ''}`}>
                         <td className="px-4 sm:px-5 py-3.5 text-sm font-semibold text-gray-700 whitespace-nowrap">{req.clients?.name || '—'}</td>
                         <td className="px-4 sm:px-5 py-3.5 text-sm font-semibold text-gray-900 whitespace-nowrap">{req.user_name}</td>
                         <td className="px-4 sm:px-5 py-3.5 text-sm text-gray-500 whitespace-nowrap">{req.user_email}</td>
@@ -440,16 +425,24 @@ export default function AdminDashboard() {
                         <td className="px-4 sm:px-5 py-3.5 text-sm text-gray-500 whitespace-nowrap">{fmt(req.start_date)}</td>
                         <td className="px-4 sm:px-5 py-3.5 text-sm text-gray-500 whitespace-nowrap">{fmtTime(req.requested_at)}</td>
                         <td className="px-4 sm:px-5 py-3.5">
-                          <div className="flex gap-2">
-                            <button onClick={() => handleRequest(req.id, 'approve')} disabled={processingId === req.id}
-                              className="text-xs font-semibold px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg cursor-pointer disabled:opacity-50 transition-colors">
-                              {processingId === req.id ? '…' : 'Approve'}
-                            </button>
-                            <button onClick={() => handleRequest(req.id, 'reject')} disabled={processingId === req.id}
-                              className="text-xs font-semibold px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg cursor-pointer disabled:opacity-50 transition-colors">
-                              Reject
-                            </button>
-                          </div>
+                          <Badge
+                            color={req.status === 'approved' ? 'green' : req.status === 'rejected' ? 'red' : req.status === 'revoked' ? 'gray' : 'yellow'}
+                            label={req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                          />
+                        </td>
+                        <td className="px-4 sm:px-5 py-3.5">
+                          {req.status === 'pending' ? (
+                            <div className="flex gap-2">
+                              <button onClick={() => handleRequest(req.id, 'approve')} disabled={processingId === req.id}
+                                className="text-xs font-semibold px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg cursor-pointer disabled:opacity-50 transition-colors">
+                                {processingId === req.id ? '…' : 'Approve'}
+                              </button>
+                              <button onClick={() => handleRequest(req.id, 'reject')} disabled={processingId === req.id}
+                                className="text-xs font-semibold px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg cursor-pointer disabled:opacity-50 transition-colors">
+                                Reject
+                              </button>
+                            </div>
+                          ) : <span className="text-xs text-gray-300">Done</span>}
                         </td>
                       </tr>
                     ))}
@@ -668,7 +661,6 @@ export default function AdminDashboard() {
             )}
           </div>
         )}
-        </div>
       </div>
     </div>
   );

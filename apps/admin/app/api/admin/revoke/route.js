@@ -44,22 +44,19 @@ export async function POST(request) {
 
     // ── APPROVE REVOKE ────────────────────────────────────────
     if (action === 'approve') {
-      // Look up user + subscription by email (subscription_id/user_id not stored in subscription_requests)
-      const { data: userRow } = await supabase
-        .from('users').select('id').eq('email', rev.user_email).maybeSingle();
+      const subReq = rev.subscription_requests;
 
-      if (userRow) {
-        // Deactivate (delete) the active subscription
-        await supabase.from('subscriptions')
-          .delete()
-          .eq('user_id', userRow.id)
-          .eq('status', 'active');
+      // Delete the subscription
+      if (subReq?.subscription_id) {
+        await supabase.from('subscriptions').delete().eq('id', subReq.subscription_id);
+      }
 
-        // Remove user if they have no remaining subscriptions
+      // Delete user if they have no other subscriptions
+      if (subReq?.user_id) {
         const { data: remaining } = await supabase
-          .from('subscriptions').select('id').eq('user_id', userRow.id);
+          .from('subscriptions').select('id').eq('user_id', subReq.user_id);
         if (!remaining || remaining.length === 0) {
-          await supabase.from('users').delete().eq('id', userRow.id);
+          await supabase.from('users').delete().eq('id', subReq.user_id);
         }
       }
 
