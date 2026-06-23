@@ -4,6 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "MG Digital Portal",
   description: "MG Digital subscription management portal",
+  icons: { icon: '/logo.png' },
 };
 
 export default function RootLayout({

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="20" fill="#1e293b"/>
+  <text x="100" y="90" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#f8fafc" text-anchor="middle">BM</text>
+  <text x="100" y="130" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">Big Membres</text>
+</svg>
